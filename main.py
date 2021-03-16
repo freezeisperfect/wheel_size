@@ -11,8 +11,14 @@ def get_brands():
 
 
 def get_id(link):
-    _bs = with_driver(SITE_URL + link)
-    markets = _bs.find_all('section', {'class': 'models-list'})
+    try:
+        _bs = without_driver(SITE_URL + link)
+        markets = _bs.find_all('section', {'class': 'models-list'})
+        markets[0].find('h4')
+    except Exception as e:
+        print(e)
+        _bs = with_driver(SITE_URL + link)
+        markets = _bs.find_all('section', {'class': 'models-list'})
     if 'market' not in markets[0].find('h4').get_text().strip().lower():
         market_type = 'None'
         tag_view = markets[0].find('div', {'class': 'large-tag-view'})
@@ -33,6 +39,7 @@ def get_id(link):
                 print(e)
                 continue
         return t_dict
+
 
 # brands_list = ['Acura', 'Alfa Romeo', 'Alpine', 'ARO', 'Aston Martin', 'Audi', 'BAIC', 'Bentley', 'BMW',
 #                'BMW Alpina',
@@ -62,11 +69,16 @@ data_dict = {brand: {'link': link, 'models': {}} for brand, link in brands_dict.
 for brand in data_dict:
     brand_url = data_dict[brand]['link']
     try:
-        bs = with_driver(SITE_URL + brand_url)
+        bs = without_driver(SITE_URL + brand_url)
         model_tags_list = bs.find_all('a', {'itemprop': 'itemListElement'})
     except Exception as e:
-        print(e)
-        continue
+        try:
+            print(e)
+            bs = with_driver(SITE_URL + brand_url)
+            model_tags_list = bs.find_all('a', {'itemprop': 'itemListElement'})
+        except Exception as e:
+            print(e)
+            continue
     models_list = list(set([m.get_text() for m in model_tags_list]))
     t_temp = []
     models_dict = {}
@@ -77,29 +89,33 @@ for brand in data_dict:
             t_temp.append(model_name)
     data_dict[brand]['models'] = models_dict
     for model in models_dict:
+        year_url = models_dict[model]['link']
         try:
-            year_url = models_dict[model]['link']
-            bs = with_driver(SITE_URL + year_url)
+            bs = without_driver(SITE_URL + year_url)
             year_tags_list = bs.find_all('a', {'itemprop': 'itemListElement'})
-            t_temp = []
-            years_dict = {}
-            for tag in year_tags_list:
-                year = tag.get_text()
-                if year not in t_temp:
-                    years_dict[year] = {'link': tag.get('href'), 'item_ids': get_id(tag.get('href'))}
-                    t_temp.append(year)
-            data_dict[brand]['models'][model]['years'] = years_dict
-            print(brand, model, years_dict)
         except Exception as e:
-            print(e)
-            error = f"{brand}_{model}_{e.__str__()}\n"
-            with open('log.txt', 'a') as file:
-                file.write(error)
-            continue
+            try:
+                print(e)
+                bs = with_driver(SITE_URL + year_url)
+                year_tags_list = bs.find_all('a', {'itemprop': 'itemListElement'})
+            except Exception as e:
+                print(e)
+                continue
+        t_temp = []
+        years_dict = {}
+        for tag in year_tags_list:
+            year = tag.get_text()
+            if year not in t_temp:
+                years_dict[year] = {'link': tag.get('href'), 'item_ids': get_id(tag.get('href'))}
+                t_temp.append(year)
+        data_dict[brand]['models'][model]['years'] = years_dict
+        print(brand, model, years_dict)
+        # except Exception as e:
+        #     print(e)
+        #     error = f"{brand}_{model}_{e.__str__()}\n"
+        #     with open('log.txt', 'a') as file:
+        #         file.write(error)
+        #     continue
 
 with open('data_dict.txt', 'w') as file:
     file.write(json.dumps(data_dict))
-
-
-
-
