@@ -11,7 +11,7 @@ def get_brands():
 
 
 def get_id(link):
-    _bs = without_driver(SITE_URL + link)
+    _bs = with_driver(SITE_URL + link)
     markets = _bs.find_all('section', {'class': 'models-list'})
     if 'market' not in markets[0].find('h4').get_text().strip().lower():
         market_type = 'None'
@@ -34,34 +34,35 @@ def get_id(link):
                 continue
         return t_dict
 
-brands_list = ['Acura', 'Alfa Romeo', 'Alpine', 'ARO', 'Aston Martin', 'Audi', 'BAIC', 'Bentley', 'BMW',
-               'BMW Alpina',
-               'Borgward', 'Brilliance', 'Bugatti', 'Buick', 'BYD', 'Cadillac', 'Changan', 'Chery', 'Chevrolet',
-               'Chrysler', 'Citroën', 'Cupra', 'Dacia', 'Daewoo', 'Daihatsu', 'Datsun', 'Dodge', 'Dongfeng', 'DS',
-               'Eagle', 'Exeed', 'FAW', 'Ferrari', 'Fiat', 'Fisker', 'Force', 'Ford', 'Foton', 'GAC', 'GAZ',
-               'Geely',
-               'Genesis', 'GEO', 'GMC', 'Great Wall', 'Haval', 'Hindustan', 'Holden', 'Honda', 'Hummer', 'Hyundai',
-               'Infiniti', 'Isuzu', 'Iveco', 'JAC', 'Jaguar', 'Jeep', 'Jinbei', 'Keyton', 'Kia', 'LADA',
-               'Lamborghini',
-               'Lancia', 'Land Rover', 'Landwind', 'LDV', 'LEVC', 'Lexus', 'Lifan', 'Lincoln', 'Lotus', 'Luxgen',
-               'Mahindra', 'MAN', 'Maruti', 'Maserati', 'Maybach', 'Mazda', 'McLaren', 'Mercedes-Benz',
-               'Mercedes-Maybach', 'Mercury', 'MG', 'MINI', 'Mitsubishi', 'Mosler', 'Nio', 'Nissan', 'Oldsmobile',
-               'Opel', 'Panoz', 'Perodua', 'Peugeot', 'Plymouth', 'Polaris', 'Polestar', 'Pontiac', 'Porsche',
-               'Proton',
-               'Qiantu', 'Ram', 'Ravon', 'Renault', 'Renault Samsung', 'Roewe', 'Rolls-Royce', 'Rover', 'Saab',
-               'Saturn', 'Scion', 'Seat', 'Seres', 'Skoda', 'Smart', 'SsangYong', 'Subaru', 'Suzuki', 'Tata',
-               'Tesla',
-               'Toyota', 'UAZ', 'Vauxhall', 'VAZ', 'Venucia', 'Volkswagen', 'Volvo', 'Wuling', 'Zedriv']
+# brands_list = ['Acura', 'Alfa Romeo', 'Alpine', 'ARO', 'Aston Martin', 'Audi', 'BAIC', 'Bentley', 'BMW',
+#                'BMW Alpina',
+#                'Borgward', 'Brilliance', 'Bugatti', 'Buick', 'BYD', 'Cadillac', 'Changan', 'Chery', 'Chevrolet',
+#                'Chrysler', 'Citroën', 'Cupra', 'Dacia', 'Daewoo', 'Daihatsu', 'Datsun', 'Dodge', 'Dongfeng', 'DS',
+#                'Eagle', 'Exeed', 'FAW', 'Ferrari', 'Fiat', 'Fisker', 'Force', 'Ford', 'Foton', 'GAC', 'GAZ',
+#                'Geely',
+#                'Genesis', 'GEO', 'GMC', 'Great Wall', 'Haval', 'Hindustan', 'Holden', 'Honda', 'Hummer', 'Hyundai',
+#                'Infiniti', 'Isuzu', 'Iveco', 'JAC', 'Jaguar', 'Jeep', 'Jinbei', 'Keyton', 'Kia', 'LADA',
+#                'Lamborghini',
+#                'Lancia', 'Land Rover', 'Landwind', 'LDV', 'LEVC', 'Lexus', 'Lifan', 'Lincoln', 'Lotus', 'Luxgen',
+#                'Mahindra', 'MAN', 'Maruti', 'Maserati', 'Maybach', 'Mazda', 'McLaren', 'Mercedes-Benz',
+#                'Mercedes-Maybach', 'Mercury', 'MG', 'MINI', 'Mitsubishi', 'Mosler', 'Nio', 'Nissan', 'Oldsmobile',
+#                'Opel', 'Panoz', 'Perodua', 'Peugeot', 'Plymouth', 'Polaris', 'Polestar', 'Pontiac', 'Porsche',
+#                'Proton',
+#                'Qiantu', 'Ram', 'Ravon', 'Renault', 'Renault Samsung', 'Roewe', 'Rolls-Royce', 'Rover', 'Saab',
+#                'Saturn', 'Scion', 'Seat', 'Seres', 'Skoda', 'Smart', 'SsangYong', 'Subaru', 'Suzuki', 'Tata',
+#                'Tesla',
+#                'Toyota', 'UAZ', 'Vauxhall', 'VAZ', 'Venucia', 'Volkswagen', 'Volvo', 'Wuling', 'Zedriv']
 
 
 brands_dict = get_brands()
 
 data_dict = {brand: {'link': link, 'models': {}} for brand, link in brands_dict.items()}
+# data_dict = {'Seat': {'link': '/size/seat/', 'models': {}}}
 
-for brand in brands_list:
+for brand in data_dict:
     brand_url = data_dict[brand]['link']
     try:
-        bs = without_driver(SITE_URL + brand_url)
+        bs = with_driver(SITE_URL + brand_url)
         model_tags_list = bs.find_all('a', {'itemprop': 'itemListElement'})
     except Exception as e:
         print(e)
@@ -78,7 +79,7 @@ for brand in brands_list:
     for model in models_dict:
         try:
             year_url = models_dict[model]['link']
-            bs = without_driver(SITE_URL + year_url)
+            bs = with_driver(SITE_URL + year_url)
             year_tags_list = bs.find_all('a', {'itemprop': 'itemListElement'})
             t_temp = []
             years_dict = {}
@@ -87,7 +88,6 @@ for brand in brands_list:
                 if year not in t_temp:
                     years_dict[year] = {'link': tag.get('href'), 'item_ids': get_id(tag.get('href'))}
                     t_temp.append(year)
-            print(brand, model, years_dict)
             data_dict[brand]['models'][model]['years'] = years_dict
         except Exception as e:
             print(e)
