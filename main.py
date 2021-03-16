@@ -89,6 +89,7 @@ for brand in data_dict:
                     years_dict[year] = {'link': tag.get('href'), 'item_ids': get_id(tag.get('href'))}
                     t_temp.append(year)
             data_dict[brand]['models'][model]['years'] = years_dict
+            print(brand, model, years_dict)
         except Exception as e:
             print(e)
             error = f"{brand}_{model}_{e.__str__()}\n"
