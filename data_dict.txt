@@ -1,1 +1,1 @@
-{"Seat": {"link": "/size/seat/", "models": {}}}
+{}
