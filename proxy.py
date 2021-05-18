@@ -9,9 +9,9 @@ class Proxy:
     def __init__(self):
         # self.req_proxy = RequestProxy()  # you may get different number of proxy when  you run this at each time
         # self._proxies = self.req_proxy.get_proxy_list()  # this will create proxy list
-
+        proxy_url = '
         self.ygo_proxies = requests \
-            .get('http://api.buyproxies.org/?a=showProxies&pid=124209&key=91b9fa70313b8c6dff2dc3f98ecf7845&port=12345') \
+            .get(f'{proxy_url}') \
             .text.strip().split('\n')
 
     @property
