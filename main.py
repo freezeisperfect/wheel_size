@@ -1,4 +1,4 @@
-from utils import *
+from utils import with_driver, without_driver
 import json
 
 SITE_URL = 'https://www.wheel-size.com'

@@ -9,7 +9,7 @@ class Proxy:
     def __init__(self):
         # self.req_proxy = RequestProxy()  # you may get different number of proxy when  you run this at each time
         # self._proxies = self.req_proxy.get_proxy_list()  # this will create proxy list
-        proxy_url = '
+        proxy_url = 'http://prontoproxy.info'
         self.ygo_proxies = requests \
             .get(f'{proxy_url}') \
             .text.strip().split('\n')
