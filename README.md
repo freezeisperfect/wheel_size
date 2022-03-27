@@ -1,5 +1,5 @@
 # Wheel Size parser
-This tool parses pages from wheel-size.com. Project forked from pythonfullstack/wheel_size and base for tool is made in original project.
+This tool parses pages from wheel-size.com. Project forked from pythonfullstack/wheel_size and base for tool was made in original project.
 
 Parsing tool saves data of wheel sizes in csv as `Auto`,`Model`,`Generation`,`Tire`,`Rim`,`Stock/not stock size`.
 
