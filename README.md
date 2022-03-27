@@ -18,3 +18,5 @@ pip install proxy
 python3 main.py
 ```
 4. Wait until data will be parsed and enjoy!
+
+Tool is still updating!
