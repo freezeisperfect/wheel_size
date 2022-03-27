@@ -1,5 +1,7 @@
 from utils import with_driver, without_driver
 import json
+import re
+from bs4 import BeautifulSoup
 
 SITE_URL = 'https://www.wheel-size.com'
 
@@ -63,43 +65,109 @@ def get_id(link):
 
 brands_dict = get_brands()
 
+# data_dict is like 'Acura': {'link': '/size/acura/',
+# 'models': {'CDX': {'link': '/size/acura/cdx/', 'years': {}}, 'CL': {'link': '/size/acura/cl/', 'years': {}} ...
 data_dict = {brand: {'link': link, 'models': {}} for brand, link in brands_dict.items()}
 # data_dict = {'Seat': {'link': '/size/seat/', 'models': {}}}
 
+
 for brand in data_dict:
     try:
+        # get brand url (models page) ; /size/acura for example
         brand_url = data_dict[brand]['link']
+        # get page of models in html ; /size/acura for example
         bs = without_driver(SITE_URL + brand_url)
+        # get models with tags (raw data)
         model_tags_list = bs.find_all('a', {'itemprop': 'itemListElement'})
+
         if not model_tags_list:
             bs = with_driver(SITE_URL + brand_url)
             model_tags_list = bs.find_all('a', {'itemprop': 'itemListElement'})
+
+        # preprocessing of raw models with tags to models only (set-like) - unused (!)
         models_list = list(set([m.get_text() for m in model_tags_list]))
         t_temp = []
         models_dict = {}
+
         for tag in model_tags_list:
+            # get model name
             model_name = tag.get_text()
+
             if model_name not in t_temp:
+                # add link of model if not listed
+                # models_dict: {'<model>': {'link': <link>, 'years':{}}}
                 models_dict[model_name] = {'link': tag.get('href'), 'years': {}}
                 t_temp.append(model_name)
+
+        # update data_dict brands with model's links
         data_dict[brand]['models'] = models_dict
+
         for model in models_dict:
             try:
+                # get model url (years page) ; /size/acura/cdx/ for example
                 year_url = models_dict[model]['link']
+                # get page of model's years in html
                 bs = without_driver(SITE_URL + year_url)
+                # get years with tags
                 year_tags_list = bs.find_all('a', {'itemprop': 'itemListElement'})
+
                 if not year_tags_list:
                     bs = with_driver(SITE_URL + year_url)
                     year_tags_list = bs.find_all('a', {'itemprop': 'itemListElement'})
+
                 t_temp = []
                 years_dict = {}
+                # print(year_tags_list)
                 for tag in year_tags_list:
+                    # get years in text
                     year = tag.get_text()
+
                     if year not in t_temp:
+                        # add link of model's year if not listed
+                        # years_dict[year]: {'<year>': {'link': <link>, 'item_ids': }}
                         years_dict[year] = {'link': tag.get('href'), 'item_ids': get_id(tag.get('href'))}
                         t_temp.append(year)
+
+                        years_url = years_dict[year]['link']
+                        bs = without_driver(SITE_URL + years_url)
+                        items = years_dict[year]['item_ids']
+                        for key, value in items.items():
+                            ids = list(value)
+                            for version in ids:
+                                splitted = re.split(r'#', version)
+                                tech_specs = bs.find_all('div', {'id': splitted[1]})
+                                car_version = tech_specs[0].find('span', {'class': 'dark font20'}).text
+                                car_version = car_version.split()[0]
+                                print(car_version)
+                                #print(tech_specs)
+                                print('i was here')
+
+                                table = tech_specs[0].find('table')
+                                tbody = table.find('tbody').find_all('tr')
+                                for tire in tbody:
+                                    stock_or_not = tire.attrs['class'][0]
+                                    print(stock_or_not)
+                                    tires = tire.find('td', {'class': 'data-tire'})
+                                    rim = tire.find('td', {'class': 'data-rim'})
+                                    tire_uniq = tires.find('span').find('span').text
+                                    rim_uniq = rim.find('span').find('span').text
+                                    engine_idx_list = tires.find_all('span')
+                                    engine_idx = engine_idx_list[-1].text
+                                    engine_idx = engine_idx.split('\n')[0]
+                                    print(engine_idx)
+
+                                    str = brand + ',' + model + ',' + year + ',' + car_version + ',' + \
+                                          tire_uniq + ',' + rim_uniq + ',' + engine_idx + ',' + stock_or_not + '\n'
+                                    print(str)
+                                    with open('comma.csv', 'a') as file:
+                                        file.write(str)
+
+
+
+                    # print('years_dict', years_dict)
                 data_dict[brand]['models'][model]['years'] = years_dict
-                print(brand, model, years_dict)
+
+
             except Exception as e:
                 print(e)
                 error = f"{brand}_{model}_{e.__str__()}\n"
